@@ -1,0 +1,145 @@
+no topic set)
+[10:12] == Erik [~Erik@public.cloak] has joined #ORTC
+[10:13] == emcho [~emcho@public.cloak] has joined #ortc
+[10:13] <emcho> scribe is in da house!
+[10:14] <@Erik> w00t!
+[10:14] <emcho> slide 5: portal and github
+[10:14] <emcho> slide 7
+[10:15] <emcho> bernard: there were editorial issues
+[10:15] <emcho> a lot of webrtc compatibility issues as well
+[10:15] <emcho> stats were updated. datachannels too
+[10:16] <emcho> also VAD and rtcp and rtp when non muxed
+[10:16] <emcho> slide 8
+[10:16] <emcho> SVC issues and ICE too
+[10:16] <emcho> ICE discussions will continue today
+[10:16] <emcho> slide 9
+[10:17] <emcho> RTP, RTCP issues (e.g. hdr ext)
+[10:17] <emcho> slide 10
+[10:17] <emcho> big picture updated
+[10:17] <emcho> ice transport controller added
+[10:18] <emcho> slide 11
+[10:18] <emcho> some strange things were noted
+[10:18] <emcho> comfort noise (3389) was not noticed anywhere
+[10:18] <emcho> also no FEC recommendation anywhere
+[10:19] <emcho> same for RFC 5450
+[10:19] <emcho> necessary for congestion control
+[10:19] <emcho> and finally a ref to 6051
+[10:19] <emcho> slide 12
+[10:19] <emcho> idp
+[10:19] <emcho> two main methods
+[10:20] <emcho> getIdentityAssertion()
+[10:20] <emcho> and
+[10:20] <emcho> setIdentityAssertion() which validates the remote peer assertion
+[10:20] <emcho> both are promises
+[10:20] <emcho> and you get an identity error object if it fails
+[10:21] <emcho> but what happens if you get an identity assertion with different values for provider and proto name
+[10:21] <emcho> oops user name
+[10:21] <emcho> slide 14
+[10:22] <emcho> one questino: should there be some kind of component to note RTP and RTCP that tells whether identity assertions are the same
+[10:22] <emcho> same question for validation
+[10:22] <emcho> slide 15
+[10:22] <emcho> VAD
+[10:23] <emcho> should we add a knob that says VAD is desired
+[10:23] <emcho> slide 16
+[10:23] <emcho> CNAME
+[10:24] <emcho> robin: cname must be filled in by developer
+[10:25] <emcho> bernard: we don’t want the developer to do that
+[10:25] <emcho> slide 17: SVC and simulcast
+[10:25] <emcho> question about layering capabilities
+[10:25] <emcho> is there a cap for max simulcast layers?
+[10:26] <emcho> slide 18
+[10:26] <emcho> added a few params for vp8
+[10:26] <emcho> max fr and max fs
+[10:27] <emcho> h.264 has a ton of params
+[10:27] <emcho> were a little scared by adding all of it
+[10:27] <emcho> we added max receive and packetisation mode
+[10:27] <emcho> there’s an ongoing discussion for opus
+[10:28] <emcho> for most things it seemed you can take receiver parameters and give them to the sender
+[10:28] <emcho> this seems to work with the params we have so far
+[10:29] <emcho> Erik: it’s my fault there was a confusion on the timing
+[10:29] <emcho> I also take some of the responsibility for WWII
+[10:29] <emcho> slide 21
+[10:30] <@Erik> lol
+[10:30] <emcho> (oh someone’s reading :) )
+[10:30] <@Erik> well done sir
+[10:30] <emcho> slide 22
+[10:31] <emcho> slide 23
+[10:31] <emcho> ice restart
+[10:31] <emcho> 5245 says you have to change ufrag and pwd on a restart
+[10:31] <emcho> that’s how you tell your peer you are restarting
+[10:31] <emcho> ORTC follows that
+[10:31] <emcho> slide 24
+[10:33] <emcho> slide 24
+[10:33] <emcho> we flush all transports on a restart
+[10:33] <emcho> RTP and RTCP restart together
+[10:34] <emcho> slide 35
+[10:34] <emcho> slide 25
+[10:34] <emcho> we need a restart method in the transport controller
+[10:34] <emcho> and that’s how you coordinate everything
+[10:34] <emcho> issue: do we change the rtcp listener object or do we just change the ufrag and pwd?
+[10:34] <emcho> possible answer: we just change values not the object
+[10:35] <emcho> bernard: question. when you call restart on an ice transport controller, does the gathering state change?
+[10:35] <emcho> yes
+[10:35] <emcho> (from Robin)
+[10:35] <emcho> more on the next slides
+[10:35] <emcho> bernard: next q: when you call restart what’s the implication for dtls
+[10:41] <emcho> we are currently hoping you won’t need to renegotiatie DTLS/SRTP
+[10:42] <emcho> but we need to check that out with the IETF
+[10:45] <emcho> discussion on this thing
+[10:46] <emcho> and we might need more of it later
+[10:46] <emcho> on the list
+[10:47] <emcho> slide 26
+[10:47] <emcho> gather policy
+[10:47] <emcho> slide 27
+[10:48] <emcho> it is important to control gathering policies because we don’t want host candidates to be revealed accidentally
+[10:48] <emcho> so to be safe: changing the gather policy means you have to restart
+[10:49] <emcho> let’s move the gather policy into the controller
+[10:50] <emcho> bernard: a similar discussion existed on the webrtc 1.0. they decided that setting a new policy works always but you need to restart for it to take effect
+[10:55] <emcho> a discussion about whether ICE restart should be supported for individual transports (m= lines)
+[10:56] <emcho> slide 30
+[10:59] <emcho> discussion on the states
+[10:59] <emcho> of ICE restart
+[10:59] <emcho> slide 31
+[11:04] <emcho> discussion on the value of the completed state for controlled
+[11:05] <emcho> decision: potentially a bug with ice. we need to wait to see how that unfolds
+[11:05] <emcho> slide 32
+[11:05] <emcho> bernard takes over
+[11:06] <emcho> (questions on the slide)
+[11:06] <emcho> slide 33
+[11:07] <emcho> we could add getParameters() method on the sender and the receiver
+[11:07] <emcho> but why?
+[11:08] <emcho> couldn’t we just make sure that we just make it settable
+[11:09] <emcho> or (slide 34) even require everything to be filled in
+[11:10] <emcho> slide 35
+[11:10] <emcho> in some cases the receiver doesn’t need to know what the encoder is going to send
+[11:10] <emcho> because he is going to need to handle it anyway
+[11:10] <emcho> required by spec
+[11:12] <emcho> another question: what if the browser doesn’t support what you are asking
+[11:12] <emcho> what then
+[11:13] <emcho> does it change it or throw an error
+[11:13] <emcho> an error might be simpler
+[11:14] <emcho> so rtp params are not a hint
+[11:14] <emcho> either you get what you asked for
+[11:14] <emcho> or you get an error
+[11:14] <emcho> slide 36
+[11:14] <emcho> robin again
+[11:15] <emcho> slide 37
+[11:17] <emcho> slide 38
+[11:19] <emcho> slide39
+[11:26] <emcho> send after send and receive after receive could cause issues
+[11:26] <emcho> with incompatible parameters
+[11:26] <emcho> but we’ll handle them one by one
+[11:26] <emcho> slide 40
+[11:27] <emcho> we are pretty much ready
+[11:28] <emcho> can anyone think of probllems ? (first problem gets $2 and every next one is a power of two)
+[11:35] <emcho> emil: do we still have the possibility to handle unknown SSRCs?
+[11:35] <emcho> robin, bernard: yeah but we mey need to iron out the details
+[11:35] <emcho> slide 41:
+[11:35] <emcho> get to the mailing list, help the work, hack the planet
+[11:36] <emcho> many thanks to bernard and justin and everyone!
+[11:36] <emcho> so, that’s it
+[11:36] <emcho> michael: did we actually make any changes on the spec
+[11:36] <emcho> bernard: quite a few actually
+[11:37] <emcho> robin: we will be doing an update on all the changes
+[11:39] <emcho> expect new versions in a week or so
+[11:39] <emcho> erik: so long and thanks for all the fish!
