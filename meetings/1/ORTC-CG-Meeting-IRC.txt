@@ -1,0 +1,132 @@
+[09:48] == Erik [~Erik@public.cloak] has joined #ortc
+[09:56] == robinraymond [~robinraymond@public.cloak] has joined #ortc
+[09:59] == Bernard [~Bernard@public.cloak] has joined #ORTC
+[10:03] == Bernard2 [~Bernard2@public.cloak] has joined #ORTC
+[10:04] == Bernard [~Bernard@public.cloak] has quit ["Page closed"]
+[10:04] <Bernard2> Participants will start off muted - to speak, please un-mute yourself.
+[10:05] <Bernard2> Scribe:  Bernard volunteers, but others should feel free to join in as well, to make sure we have good coverage.
+[10:05] <Bernard2> Robin: Welcome to the W3C ORCA Community Group meeting (potentially with a name change).
+[10:06] <Bernard2> Robin: We will post the IRC link again:  http://irtc.w3.org/#ortc
+[10:06] == mchampion [~mchampion@public.cloak] has joined #ortc
+[10:06] == chris [~chris@public.cloak] has joined #ortc
+[10:07] <Bernard2> Robin:  In the Hangout, you can click on the ORTC person and that will allow you to see the presentation and follow along.
+[10:07] <Bernard2> Robin: This is the first meeting of the W3C ORCA CG.  We'd like your feedback on how things will go.  We're hoping to introduce you to the group, bring you up to date on the API and make progress on issues.
+[10:08] <Bernard2> Robin:  slides will be published to ORTC.org website so you can get them afterwards.
+[10:08] <Bernard2> Robin:  I am Robin Raymond of Hookflash, Chair of the CG and spec editor.
+[10:09] <Bernard2> Robin: Want to describe IPR policies, differences between a CG and a WG.  CG is enthusiasts coming together.  IPR rules are slightly different.  As an Editor, have to take things cleared for IPR (agree to license agreement).
+[10:10] <Bernard2> Robin:  A few ways to do this.  You can join the CG or give a statement relating to a particular contribution.  This allows us to rapidly develop the spec, and conform to the W3C Royalty-Free policy.  Anyone can post to public-orca, you don't need to be a member.
+[10:10] <Bernard2> Robin: When you want to contribute, you can send to the public-orca, but also should CC the contrib list.
+[10:12] <Bernard2> Robin:  the ortc.org site has links to the editor's drafts, github repos, etc.   Issues are created in Github.
+[10:13] <Bernard2> Robin: The latest editor's draft is from 13 February.  There is a link from the ORTC site.  Many changes since January.  This includes split of RTCTrack into Sender and Receiver objects. RTCConnection split into Ice transport and DTLS transport objects.
+[10:14] <Bernard2> Robin: SCTP transport object added for the data channel.  Header extension parameter added.  The ICE listener enabled parallel forking. DTMF support was there, taken out, now added back.
+[10:15] <Bernard2> Robin:  this is the Big Picture architecture.  Start off with a MediaStreamTrack wired to an RtpSender, data gets sent over DtlsTransport which goes over the ICE transport.  ICE transport is wired to ICE listener so you can have more than one ICE transport for a given listener.  Then the media goes over the Internet to the peer.
+[10:16] <Bernard2> Robin:  Some known loose ends that need to be cleaned up.  Data Channel is wired to the DTLS transport but should be wired to the SCTP transport.  Some missing examples and some probably need to be cleaned up. DTLS fingerprint and identity is missing.  We think we know how it should work but it is not there yet.
+[10:16] <Bernard2> Robin:  How do we manage errors and stats is a big black hole as well.
+[10:17] <Bernard2> Robin:  Do people like the way we're heading?  Are there are any big concerns about it?  Should we be doing something entirely different?
+[10:18] <Bernard2> Robin: Error handling is an ongoing discussion (promises vs. feedback on the object, error states, etc.).  Some talk on how to do CSRC management for active speakers.
+[10:18] <Bernard2> Robin:  This is a valuable contribution... we are not necessarily trying to take care of everything though.
+[10:19] <Bernard2> Robin: When it comes to RTPListener object (not the ICElistener!), this is about handling unhandled SSRCs, but not mapped to an RTP receiver yet.  Do you buffer data?  How much?  What callbacks do you need?
+[10:20] <Bernard2> Robin:  We hope to cover the RTCRtpParameters objects... so as to define codecs, layering, simulcast, etc.
+[10:20] <Bernard2> Robin:  These are the issues we are hoping to get through today.... hopefully some will be non-controversail.
+[10:21] <Bernard2> Robin:  DTMF support.  It is in the latest editor's draft.  It is basically modeled after the WebRTC 1.0 specification.  Same RFC 4733 model.  Are people OK with it?
+[10:22] <Bernard2> Robin:  Data Channel is wired to RTCDtlsTransport but should be wired to RTCSctpTransport.
+[10:22] == jlightfoot [~jlightfoot@public.cloak] has joined #ortc
+[10:23] <Bernard2> Justin:  Can you explain the max size issue?
+[10:23] <Bernard2> Robin: Data Channel SCTP transport has to have a max size, since there is no concept of streams...
+[10:24] <Bernard2> Robin: So you need an SCTP transport object, might as well wire the data channel object to it.... also want to receive data channel events... so data channel should be wired to SCTP transport.
+[10:25] <Bernard2> Justin:  If we had a generic transport... would it have its own max message size?
+[10:26] <Bernard2> Robin:  Don't know what other transports would exist... although we have direct wiring... I forsee a future where we might have base transport objects....
+[10:27] <Bernard2> Robin:  Next slide (Issue 35).  This is related to the previous issue.  right now receiver and sender objects you have direct wiring... there will be alternatives.
+[10:27] <Bernard2> When those transports get defined, there will be a base class.
+[10:30] <Bernard2> Bernard:  this one is more immediate... there are server-side (node.js) cases where alternative transports might be needed. For example, in a gateway you could have DTLS transport on the WebRTC side, and SRTP/SDES or RTP in the clear on the legacy side.
+[10:30] <Bernard2> Robin:  We didn't want to add support for alternative transports until we had a use case...
+[10:31] <Bernard2> Bernard:  Agree that you don't want to confuse a browser spec with server-side functionality... could confuse browser implementers.  But guidance for the server-side node.js spec would be helpful.  Should they support alternative constructors or not, etc.
+[10:31] <Bernard2> Robin:  Issue 31 (Big Proposal) is where we want to spend much of our time today.
+[10:32] <Bernard2> Robin:  This is only the first proposal.  We are trying to provide general guidance to the media engine as to what we want it to do.  As many call backs as we can allow without overloading JS.
+[10:33] <Bernard2> Robin:  Want reasonable set of default behaviors.  Keep those issues in mind.
+[10:33] <Bernard2> Robin:  I'm going to hand this over to Peter Thatcher, since this is his proposal.
+[10:33] <Bernard2> Peter:  We're trying to focus on the use cases.  so here are some examples.
+[10:34] <Bernard2> Peter:  There has been discussion of different things to tweak... how to control quality vs. framerate, how to configure the policy.  For a lot of them, I've asked for a use case.
+[10:34] <Bernard2> Peter: We're going to be most successful if we can point back to use cases and see if we meet them.
+[10:34] <Bernard2> Peter:  Here are the configurations on a per-layer basis. Might have 3 layers in a simulcast.
+[10:35] <Bernard2> Peter:  if layered codec then dependencies matter, otherwise not.  Active is used to turn on/off layers.  Better than removing a layer so RTCP can keep functioning and resources can be allocated to avoid delays in bringing it back.
+[10:37] <Bernard2> Bernard: How do you apply RTX or FEC to only a given layer?
+[10:37] <Bernard2> Peter:  The comment on "existing codecs, header extensions, etc. could be used there.  So you could do it.
+[10:37] <Bernard2> Justin:  right now we are biasing toward fewest knobs possible.
+[10:38] <Bernard2> Peter:  Discussion on the list about maxes and mins... there are different variations on what knobs to make availabale.
+[10:39] <Bernard2> Peter:  Next slide has some examples... more in the email.
+[10:39] <Bernard2> Peter:  If you wanted to crank up quality... in sign language where framerate is more important you can bias toward that... in screen sharing, resolution might be more important, can do that.
+[10:40] <Bernard2> Peter:  for simulcast you can give several different encodings.  In simulcast you don't specify resolution you control scale.  For cropping you control it at the track, not the encoding.
+[10:40] <Bernard2> Peter:  We have control over resolution in the track, so why do it in the encoding?
+[10:41] <Bernard2> robin:  there are discussions of whether we should have one RTP sender for simulcast or multiple.
+[10:41] <Bernard2> Peter:  It is always possible for the application to create multiple RTP senders.  question is whether it is beneficial or not, versus a single sender.
+[10:42] <Bernard2> Justin:  Key thing is that with multiple RTP senders, need multiple tracks as input so need to clone the input.  If you want to display different tracks, have different senders and receivers... but if there is an SFU in the middle, then a single sender and receiver makes more sense.
+[10:42] <Bernard2> Robin:  How do you specify simulcast versus layering?  Looks identical.
+[10:43] <Bernard2> Justin:  Difference is that in layered, there is the "layered dependencies".  This wouldn't be there in simulcast.
+[10:43] <Bernard2> Robin:  So for layering, MUST specify layered dependencies.
+[10:43] <Bernard2> Emil:  Question about simulcast.  How would different framerates work?
+[10:44] <Bernard2> Justin:  do you mean resolution and frame rate?
+[10:44] <Bernard2> Emil: Yes, a thumbnail with 1 frame/second, for example and another encoding with full resolution and higher framerate.
+[10:44] <Bernard2> Justin:  In that case should we have multiple RTP senders?  Might want to scale down resolution and framerate at once.
+[10:45] <Bernard2> Emil:  But then you would lose the efficiency, right?
+[10:45] <Bernard2> Justin:  The thumbnail might be very different from the main stream....
+[10:45] <Bernard2> Robin:  We don't have exact sizing... want to do it outside the RTP sender... you'd need to clone the track and do it outside, right?
+[10:45] <Bernard2> Justin:  Right.
+[10:46] <Bernard2> Justin:  We need a use case and see if the API fits that.
+[10:46] <Bernard2> Chris Wendt:  In temporal scaling you have different framerates for different layers....
+[10:47] <Bernard2> Justin:  extension layers have same framerates....
+[10:47] <Bernard2> Justin: plan was to have on/off knob for temporal layers.
+[10:48] <Bernard2> Justin:  Need to be able to set number of temporal layers (by default, a single layer).
+[10:48] <Bernard2> Chris:  are you changing resolution on the fly?
+[10:49] <Bernard2> Justin:  We have a concept of a maximum QP... if we can't sustain that QP we have to do something to get bitrate down... can reduce framerate or resolution, so bias gives us a hint which to do first.
+[10:50] <Bernard2> Chris:  Should we signal application to change the scale... course grained control of resolution happens once in a while, that the app might want to control...
+[10:50] <Bernard2> Justin:  That is one way of doing it.  You want something that works well even for applications that are not sophisticated.
+[10:51] <Bernard2> Chris:  Would be nice to have both scenarios supported... if you want a resolution don't care about quality, then the dumb mode where it is do whatever it takes to get a good stream...
+[10:51] <Bernard2> Robin: When max or min thresholds are reached, a callback event to the JS to figure out what to do....
+[10:51] <Bernard2> Chris: That is what I suggested.
+[10:51] <Bernard2> Robin: Maybe bias is a sliding scale versus all or nothing.
+[10:52] <Bernard2> Justin:  Temporal/spatial tradeoff parameter.
+[10:52] <Bernard2> Justin: We talked about that, but didn't end up going that way... we can come up with things to provide guidance on what the behavior should be.
+[10:53] <Bernard2> Justin; scale is for relation between different encodings.
+[10:54] <Bernard2> Peter: if we think of variations that would be better...come up with examples.
+[10:56] <Bernard2> Bernard: In the example, how would MST handle layer dependencies if you had separate RtpSenders?  Or can the ssrc's be different in one encoding object?
+[10:57] <Bernard2> Justin:  This is about "Single Session" versus "Multiple Session".  Multiple sessions require multiple RtpSenders, but multiple sources do not.  So you could have the SSRCs be different in the encodings object.
+[10:58] <Bernard2> Justin:  rate control is very implementation dependent and unlikely to be standardized.
+[10:58] <Bernard2> Chris:  I think it is fine.
+[10:59] <Bernard2> Robin:  will behavior be similar between implementations?
+[10:59] <Bernard2> Chris:  you're never going to get two implementations of rate control to act the same way.
+[11:01] <Bernard2> Bernard: You could have spatial simulcast with each simulcast also supporting temporal scaling... in that case it doesn't make sense to have a resolution/framerate tradeoff in a sender object supporting temporal scaling... framerate is the only dimension in that object, you switch between objects to affect resolution.
+[11:01] <Bernard2> Justin:  yes, there is no overall way to specify the tradeoff... it is only at the object level.
+[11:04] <Bernard2> Robin:  This is a very nice proposal. It is good to have something concrete... but overall I like it.  We welcome everyone to read up on the details.  Let us keep it simple for simple cases. Allow apps to control weird situations.
+[11:04] <Bernard2> Chris:  I like the proposal as well.
+[11:04] <Bernard2> robin:  why don't we finish off one more topic.... then come back to this.
+[11:05] <Bernard2> robin: Sylvia requested to change the CG name.... ORCA is name of the CG, ORTC is the name of the specification.
+[11:05] <Bernard2> Robin: ORCA exists as another project... might be better to just use ORTC.
+[11:06] <Bernard2> Michael Champion:  Changing name is easy... changing URLs is not.
+[11:06] <Bernard2> Erik:  changing the URL shouldn't be taken off the table....
+[11:07] <Bernard2> Michael:  If that is the right thing to do, we might be able to do it....
+[11:08] <Bernard2> Robin:  mailing list could be an issue.....
+[11:08] <Bernard2> Emil:  a question about lifecycle.... would this group disappear and fold into the WebRTC WG?
+[11:09] <Bernard2> Michael:  W3C model is that when CGs produce something substantial they transition...
+[11:09] <Bernard2> Erik:  Could transition to an existing WG or a new one.... or not.
+[11:10] <Bernard2> Michael:  It is what the CG thinks... but don't need to make the decision now.... can worry about that when we have implementations and proof of concept.
+[11:12] <Bernard2> Bernard:  Change name, but not URL... be aware that there are other uses of the ORTC abbreviation as well.
+[11:12] <Bernard2> Erik:  Are we going to change the name?  If so, should we change it to ORTC?  I am in favor of changing the name.
+[11:12] <Bernard2> Chris:  I agree.
+[11:12] <Bernard2> Peter:  Having 1 name instead of 2 would be good.
+[11:12] <Bernard2> Emil:  Avoiding two names is good.
+[11:13] <Bernard2> Erik:  Anyone opposed?
+[11:13] <Bernard2> No one opposed.
+[11:13] <Bernard2> Robin: One slide at the end... thanks to folks who have put in work....
+[11:13] <Bernard2> Robin:  Let's go back to meat and potatoes... slide 20.
+[11:14] <Bernard2> Erik: there were some specific items....
+[11:15] <Bernard2> Robin:  we are targetting browsers, mobile and possibly server.  A server might implementation might not have getUserMedia().... just keep that in mind.
+[11:17] <Bernard2> Bernard:  As we move ahead on configuring things... may want to check if we are advancing equivalently in discovery of capabilities...
+[11:17] <Bernard2> Justin:  Not everyone would support spatial scalability in VP9... so you'd need to know that before configuring something that the browser couldn't do.
+[11:18] <robinraymond> Thanks Bernard!
+[11:18] <Bernard2> Robin:  Anyone have any last items before we adjourn?
+[11:18] <robinraymond> Not from me.
+[11:18] <Bernard2> 11:18 AM Pacific Meeting adjourned.
+[11:19] == mchampion [~mchampion@public.cloak] has quit ["Page closed"]
+[11:19] <robinraymond> Erik: should make transcript available from ortc.org
+[11:22] <@Erik> will do
