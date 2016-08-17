@@ -1,0 +1,126 @@
+Minutes of the ORTC CG Meeting
+October 17, 2014
+
+Jisti Meeting Info:
+    https://docs.google.com/presentation/d/1hFk9MhiTpwcITsxZ_KWMzmQ3SSmhdiJmLauYtbv8X-A/edit#slide=id.g4928386c7_212
+
+Agenda
+Review of spec changes
+Outstanding 1.0 issues
+– Stats
+– IdP
+– Synchronize with 1.0
+– Datachannel ?
+Rename IceListener to IceGatherer
+Latching rules definition & added into spec
+– Undefined RTP listening behavior – issue 48
+Discuss SVC “automatic” configuration scenario vs manual configuration
+Call for implementations. Existing reference implementations:
+– ORTC Library: http://www.slideshare.net/ErikLagerway/ortc-lib-introduction
+– Call for help, there is plenty to do, some examples:
+– Browsers: JS Shim work
+– Servers: Node.js work eg. SIP to ORTC Gateway
+Google progress; Canary Sender/Receiver – JS bindings? When will we see the rest of the ORTC API ?
+Microsoft progress; Progress of Modern API? Under Consideration to Under Development?
+Discuss options to migrate this work into the W3C WebRTC WG?
+
+Scribe volunteers are Jon and mchampion
+
+Possibility to have larger conferences is still experimental;)
+
+"Updated Big Picture" slide is essentially one level below the WebRTC 1.0 PeerConnection 
+
+DataChannel is essentially the same as 1.0
+
+Stats API is not on on the slide
+
+Grayish boxes are those that are being introduced into 1.0 
+
+Only thing on the picture that has changed since previous draft is rename to IceGatherer
+
+
+Coming Attractions slide .... 
+
+
+
+DTMF, IdP and DataChannel specs are tied to WebRTC 1.0 and are expected to remain so.
+
+Updated Stats API slide
+Proposal to point to 1.0 Stats API and remove redundant text, just describe how the 1.0 Stats API is referenced from ORTC
+
+Robin: Only issue is with Session stats. No objection to referencing the 1.0 Stats API
+Bernard: will take another pass at aligning them
+
+Any objections to broadly adopting the 1.0 Stats API?
+NONE HEARD
+
+Automatic use of SVC?
+Bernard: this is simple in VP8 decoder
+But there is potential overhead, should be explicit in encoder.  
+Need for layers can change with network conditions.  How does app tell browser to just handle it?
+
+Justin: there should be a knob that says turn on temporal, spatial layering and maybe max layers, details should be handled by browser
+
+(side note: might also be a good idea to be able to set min layers - in use case of slides being unreadable in a given app if the base layer is not high resolution enough - if I was hearing Justin's note correctly)
+
+Discussion of layering - Codec Capabilities and Codec Parameters slide
+Justin: THis API is for people who know what they are doing, convenience functions are not a goal.
+Bernard: Agrees but the question is how  we expose the necessary capabilities
+Justin: Browser should be able to override APIs layer settings to handle bandwidth constraints
+
+Bernard: Clarifies that this is a "best effort" instruction, not a fine tuning of what browser actually does
+Justin: Receiver doesn't need to be configured, at least for VP8
+Bernard: We should come up with clarifying text
+
+Robin: Any objection to spec saying that these speciify the "up to level" and browser does what it can/wants to do up to that level?
+
+Discussion of processor constraints, which are less straightforward than bandwidth constraints.  
+
+Justin: These are hard problems we've wrestled with for years. Right way forward is
+- You doen't get layering unless you ask for it
+- Bandwidth or compute limitations may not allow you to get what you asked for
+
+Conclusion: No objections to proposal
+
+Discussion of slides 19-20
+
+Discussion of proposed resolution on slide 22
+
+Slide 23:
+    From Peter - Would this work? dictionary RTCRtpCodecParameters { DOMString name; payloadtype payloadType; payloadtype rtxPayloadType; // ... };
+    
+
+
+Resolution: Needs further discussion and proposals on the list
+
+Slide 24 - Issue 155
+Justin: Doesn't believe this scenario is possible
+Issue proposer not on the call. 
+Scenario probably not in scope for ORTC 1.1
+Resolution - close issue as no go unless someone can come up with a more compelling rationale
+
+Slide 26 - call for implementations
+
+Claudio: Waited for call for implementations to express our interest.  With ORTC we could support IE.  Not clear what advantages of ORTC over WebRTC today would be
+Robin: Not either / or.  There are additional scenarios which ORTC supports, such as native mobile apps
+Justin: They are complementary, the advantages are the detailed control surfaces 
+
+
+Bibop: We are convinced ORTC is going in right direction, developing moderated video chat app.  Want to support project and make it available to consumers.  Will help speed up development proecess.
+
+Justin: Hopes to land pull request to put Sender/Receiver in 1.0, will make additional proposals at upcoming WG meeting.  THese would be read-only components.  Peter has ideas how to bring in more ORTC components into 1.0 to give WG a clear direction for the future. Hopes to see much of CG work in official 
+
+Microsoft will make a public statment about the ORTC status in IE before TPAC
+
+Emil said he encouraged other browsers to implement ORTC
+
+
+
+
+
+
+
+
+
+
+
