@@ -1,0 +1,87 @@
+
+[09:49] == Erik [~Erik@public.cloak] has joined #ORTC
+[09:54] == Shijun [~Shijun@public.cloak] has joined #ORTC
+[09:59] <@Erik> Where:  Hangouts on Air link https://plus.google.com/u/0/events/c1psvbk9sb66v4p6do0en7o0uuk  Participants Link: https://plus.google.com/hangouts/_/hoaevent/AP36tYdxyN2FlKWb1DWLQqCo5Q2-dihz6uHKlGvDgv4JYrujd1_zZQ?hl=en&authuser=0  Slides: https://docs.google.com/presentation/d/11JBlA-9gY4qZzUB6YhhMjeeA7tc9vSJowvs6tgI2f1c/edit#slide=id.p
+[09:59] == mathieucitrix [~uid123277@public.cloak] has joined #ortc
+[10:04] == robinraymond [~robinraymond@public.cloak] has joined #ortc
+[10:04] == jschurman [~jschurman@public.cloak] has joined #ortc
+[10:05] == Pedro [~Pedro@public.cloak] has joined #ORTC
+[10:05] == mchampion [~mchampion@public.cloak] has joined #ortc
+[10:07] * mathieucitrix Is the on air broadcast live ?
+[10:07] <Shijun> Erik: welcome to the 10th CG meeting
+[10:09] <Shijun> Bernard: to cover the draft changes since June
+[10:10] <Shijun> summary on slide 7
+[10:10] <Shijun> slied 8 - RTCWeb/WebRTC 1.0 compatibility
+[10:13] <Shijun> slide 9: adapter.js for ORTC and WebRTC 1.0 compatibility
+[10:13] <Shijun> slide 10: codec capabilities and settings
+[10:16] <Shijun> slide 11: data channel update by Robin
+[10:17] <Shijun> Robin: slide 12, RtpListener issue #243
+[10:18] <Shijun> slide 13: proposed solution - add optional headerExtension params
+[10:19] <Shijun> Justin: might be issue with corner cases
+[10:22] <Shijun> Bernard: if there is no receiver ready, still makes sense?
+[10:23] <Shijun> Justin, we should specify the use case better
+[10:24] <Shijun> Robin: there is ambiguity, so spec need at least clarification
+[10:24] <Shijun> Robin: discuss further on the list
+[10:26] <Shijun> Bernard: slide 14, miscellaneous issues
+[10:27] <Shijun> slide 15, issues to discuss today
+[10:27] <Shijun> slide 16: VP8 and H.264 capabilities
+[10:29] <Shijun> slide 17: video codec settings
+[10:32] <Shijun> Justin: maxFr and maxFs setting seem should be at a higher level, not at the codec.
+[10:32] <Shijun> Robin: there are codec specfic settings
+[10:33] <Shijun> Justin: codec specific setting not ideal
+[10:38] == Erik_ [~Erik@public.cloak] has joined #ORTC
+[10:39] == shijun_ [~shijun@public.cloak] has joined #ORTC
+[10:39] == jschurman [~jschurman@public.cloak] has quit ["Page closed"]
+[10:39] == jschurman [~jschurman@public.cloak] has joined #ORTC
+[10:40] <shijun_> slide 18: priority type and degradationpre ference
+[10:40] == Shijun [~Shijun@public.cloak] has quit [Ping timeout: 180 seconds]
+[10:40] <shijun_> slide 19: WebRTC 1.0 on the changes
+[10:40] <mchampion> I can scribe
+[10:41] <shijun_> slide 20: the setting is an RTpSender level setting in 1.0 API
+[10:41] <shijun_> slide 21: changes to the encoding params
+[10:42] == jschurman [~jschurman@public.cloak] has quit ["Page closed"]
+[10:42] <shijun_> Robin: slide 22, RIDs
+[10:42] <mathieucitrix> one thing for degradation and simulcast, it would be great to specify that a layer needs to be dropped under degredation
+[10:42] <shijun_> slide 23: purpose of RID
+[10:45] <shijun_> Justin: different simulcast streams with different RIDs, different layer in each simulcast has differnt RIDs
+[10:46] <shijun_> Bernard: temporal layers as well?
+[10:47] <shijun_> Robin: should discuss further and clarify
+[10:47] <shijun_> Peter: source RTP stream Identifier, not "restriction identifier"
+[10:47] <shijun_> Robin: on slide 24
+[10:48] <shijun_> slide 25: RID handling with encodingId
+[10:49] <shijun_> Robin: 1:1 mapping?
+[10:49] <shijun_> Peter: yes if no SVC
+[10:49] <shijun_> slide 26: Encoding Params with RID attribute?
+[10:52] <shijun_> Peter: separate ssrc's in svc will need differnt RID
+[10:52] <shijun_> Justin: should require same ssrc for temporal layers
+[10:53] <shijun_> Bernard: slide 27, simulcast
+[10:54] <shijun_> slide 28: need more in ORTC API?
+[10:58] <shijun_> Justin: maxfr should be controlled by the track
+[11:01] <shijun_> Justin: maxH, maxW should at least map to a scaling operation in the lower stack, without changing aspect ratio
+[11:02] <shijun_> Bernard: need fr-scale for temporal svc?
+[11:03] <shijun_> Justin: for spatial and temporal combined svc, will need many fr-scale, would be confusing
+[11:05] <shijun_> Peter: should match 1.0 API, so maxFr is needed
+[11:05] <shijun_> Peter: not maxH, maxW yet, although hinted by people
+[11:07] <shijun_> Bernard: need to decide whether we need fr-scale in ORTC
+[11:08] <shijun_> Justin: should go over all the encoding params in ORTC
+[11:09] <shijun_> Erik: slide 29, open for CG comment
+[11:10] <shijun_> Peter: sent feedback to the list on IceGatherer, Fippo responded there already
+[11:11] <shijun_> Peter: Sctp transport port number, why should we have that?
+[11:12] <shijun_> on slide 11, issue 227
+[11:13] <shijun_> Robin: it is optional, need this for SDP/shim.
+[11:14] <shijun_> consesus is to kep the change
+[11:15] <shijun_> Justin: any info on Opus changes?
+[11:15] <shijun_> Bernard: let's check the Nov-draft section
+[11:16] == mchampion [~mchampion@public.cloak] has quit ["Page closed"]
+[11:16] <shijun_> Justin: not need "stereo"
+[11:18] <shijun_> Peter: is the maxPlaybackRate needed from the browser as capability?
+[11:18] <shijun_> Justin: most can be app-specific properties
+[11:21] <shijun_> Justin: need ptime
+[11:22] <shijun_> Justin: some settings can be moved to a higher layer, if they are not specific to Opus
+[11:23] <shijun_> Justin: no need of any of these in SDP
+[11:24] == rshpount_ [~rshpount@public.cloak] has joined #ortc
+[11:25] == rshpount_ [~rshpount@public.cloak] has left #ORTC []
+[11:28] <shijun_> Robin: should we balance the surface API and encoding params?
+[11:28] <shijun_> Justin: remove if not needed
+[11:29] <shijun_> Erik: wrap up, and background info
+[11:30] <shijun_> Erik: meeting closed
