@@ -1,0 +1,159 @@
+[10:07] == Erik [~Erik@public.cloak] has joined #ortc
+[10:13] == Bernard [~Bernard@public.cloak] has joined #ortc
+[10:13] == jims [~jims@public.cloak] has joined #ortc
+[10:14] == juberti [~juberti@public.cloak] has joined #ortc
+[10:14] <juberti> ORTC website: http://ortc.org/
+[10:15] == emcho [~emcho@public.cloak] has joined #ortc
+[10:15] <juberti> ORTC API Issues List. Discussions should happen on the list, but they will be tracked on the GitHub website.
+[10:15] <juberti> robin: we'll be discussing big picture, goals, a few issues to resolve
+[10:16] <juberti> robin: big picture slide
+[10:16] * mchampion asks for a link to the deck Robin is going thru to be posted here
+[10:16] <emcho> mchampion: https://docs.google.com/a/sip-communicator.org/presentation/d/1ZP2bt_coR47Y3O2Mf003sD5n8mx8CLClhZs3YSX-E-Y/edit#slide=id.g2bc53b137_010
+[10:16] <juberti> robin: ORTC main value proposition
+[10:17] <juberti> ... granular/object-level control of RTC behavior without offer/answer
+[10:17] <juberti> ... not tied to a specific blob legacy format
+[10:17] <juberti> ... support for simulcast, layering
+[10:17] <juberti> robin: goals
+[10:17] <juberti> ... support functionality in WebRTC 1.0 (AKA parity)
+[10:18] <juberti> ... aiming for simple API to start; when we need more stuff later, we can add it
+[10:18] <juberti> ... clear PAI rule sets, behaviors
+[10:18] <juberti> s/PAI/API/g
+[10:22] <juberti> juberti: what should we be calling ORTC 1.0?
+[10:22] <juberti> .. is it "2.0?" or something else?
+[10:22] <juberti> some discussion for various folks about dating by document date, year of publication, etc
+[10:24] <juberti> juberti: what should we say when discussing "in ORTC 1.0 or not"? "1.0" is confusing with WebRTC 1.0
+[10:24] <juberti> peter: how about ORTC 1.1 for now, and 1.2 for v.next?
+[10:24] <juberti> general agreemeent that v1 should be called ORTC 1.1, v.next is ORTC 1.2
+[10:25] <juberti> robin: discussed various priority issues
+[10:25] <juberti> robin: ORTC 1.0 criteria
+[10:25] <juberti> ... anything we need from WebRTC 1.0
+[10:26] <juberti> ... anything we need for API usability
+[10:26] <juberti> ... things that have well-defined problem space/use case
+[10:26] <juberti> ... things needed for interop/compatibility
+[10:27] <juberti> .... things with clear benefit to develoeprs
+[10:28] <juberti> bernard: has concern over ICE controls
+[10:29] <juberti> bernard: had to do a lot of happy eyeballs stuff to avoid weird tunnels
+[10:29] <juberti> bernard: also has concerns about metered interfaces
+[10:30] <juberti> bernard: the happy eyeballs stuff predated the standardization work here
+[10:30] <juberti> chris: is Qos related to this?
+[10:31] <juberti> justin: can this just be done in the runtime versus the app?
+[10:32] <juberti> justin: would be nice to make this generally available to webrtc devs
+[10:32] <juberti> justin: there is a higher cost of doing this in an API than a general implementation
+[10:33] <juberti> bernard: agree, bernard will make specific proposals
+[10:33] <juberti> robin: recent editor's draft update
+[10:33] <juberti> bernard: included peter's suggestions on quality/res/framerate
+[10:34] <juberti> bernard: added ICE TCP, RTPListener
+[10:34] <juberti> bernard: resolved various nites
+[10:34] <juberti> s/nits/nites/g
+[10:34] <juberti> bernard: initial stab at CSRCs
+[10:34] <juberti> bernard: added default values for dictionaries
+[10:35] <juberti> bernard: document not yet "feature complete", but getting there.
+[10:35] <juberti> robin: questions for the CG
+[10:35] <juberti> ... OK with where we are going?
+[10:35] <juberti> ... questions about general aspects of the spec?
+[10:40] == jims [~jims@public.cloak] has quit [Ping timeout: 180 seconds]
+[10:43] <juberti> ... discussion about CSRCs
+[10:44] <juberti> ... issue 27 in issues list
+[10:47] <juberti> Emil would definitely like to see this happen
+[10:48] <juberti> ... concerned about the usability of the other mechanisms - stats, Web audio, data channe
+[10:48] <juberti> ... would be inconvenient to not have this, but could wait until 1.2
+[10:50] <juberti> Agreement to defer this until 1.2. Justin to review the existing API that was added
+[10:50] <juberti> Zakim
+[10:50] <juberti> peter talking about "big proposal"
+[10:51] <juberti> split layering/simulcast into its own issue (issue 61)
+[10:51] <juberti> and quality knobs proposal (62)
+[10:51] <juberti> peter has ideas about non-muxed RTCP
+[10:51] <juberti> robin: how are these objects related?
+[10:52] <juberti> robin explaining more
+[10:52] <juberti> peter: haven't written this up yet
+[10:52] <juberti> robin: issues for today
+[10:52] <juberti> ... stats, ice-tcp, ice gather policy, ice freezing, factory method pattern
+[10:52] <juberti> eric: 45 minutes in, 45 minute remaining
+[10:52] <juberti> robin: getStats
+[10:53] <juberti> bernard: getStats, reused from 1.0
+[10:53] <juberti> ... stats are scoped to each object
+[10:53] <juberti> ... include existing stats from 1.0
+[10:53] <juberti> ... what additional stats need to happen?
+[10:55] <juberti> bernard: are the xrblock stats going into webrtc?
+[10:55] <juberti> justin: I don't think the webrtc folks and xrblock folks are talking
+[10:55] <juberti> justin: I think what is needed is the stats wiki stuff to make it into the actual webrtc 1.0 spec
+[10:56] <juberti> justin: and then we need to figure out how those things map down to our objects
+[10:56] <juberti> that should get us 90% of the way there
+[10:56] <juberti> robin: ICE-TCP
+[10:56] <juberti> robin: Talking about RFC 6544
+[10:57] <juberti> Adding candidate protocol (RTCIceProtocol), and RTCIceTcpType "active"/"passive"
+[10:57] <juberti> the .tcpType is a nullable entry
+[10:58] <juberti> present in the RTCIceCandidate dictionary
+[10:58] <juberti> emil: should we have a SCTP RTCIceProtocol
+[10:58] <juberti> bernard: how would that work?
+[10:58] <juberti> emil: if you have native SCTP, you could use this
+[10:59] <juberti> bernard: but this isn't how the data channel works
+[10:59] <juberti> emil: let's forget it for now
+[10:59] <juberti> emil: do you even need to offer active candidates?
+[10:59] <juberti> robin: yes, you do need to offer these candidates
+[11:01] <juberti> justin: technically you don't need these, but the spec says this, it's there for completeness
+[11:01] <juberti> robin: for better interop
+[11:01] <juberti> robin: Ice gather policy
+[11:01] <juberti> robin: taken from 1.0
+[11:02] <juberti> robin: originally he made a more extensive suggestion, but right now he is focusing on whether it is supported by use cases.
+[11:02] <juberti> robin: need a followon discussion of the things that bernard discussed
+[11:03] <juberti> justin: there was the happy eyeballs stuff, which i hope can be handled internally, and then the metering stuff, which bernard was going to make a proposal on
+[11:03] <juberti> justin: bernard has the action to propose these
+[11:04] <juberti> emil: should we allow teredo interfaces to be omitted?
+[11:04] <juberti> bernard: that's what we ran into
+[11:05] <juberti> robin: let's have use cases to drive this
+[11:05] <juberti> justin: yes, and please think about what the web app should do with the api. does it even know how to set this flag properly?
+[11:06] <juberti> justin: if not, the implementation should just figure out what to do
+[11:06] <juberti> robin: anyone think we should do something more here?
+[11:06] <juberti> robin: ok, let's keep it as is.
+[11:06] <juberti> robin: ICE freezing
+[11:07] <juberti> ... this requires some sort of ordering between ICE components, where you don't start checking one before another
+[11:07] <juberti> ... how is this ordering known?
+[11:07] <juberti> ... this applied to audio vs video, rtp vs rtcp
+[11:07] <juberti> ... could be done via some implicit rules, but this doesn't work in one specific case
+[11:09] <juberti> ... implicit rules is to do ordering based on icetransport creation. candidate unfreezing based on foundation matching
+[11:10] <juberti> ... but the key problem is that freezing works based on session
+[11:10] <juberti> ... and so we don't get the right outcome if we have multiple sessions at the same time
+[11:10] <juberti> erik: 20 minutes left
+[11:11] <juberti> robin: do we have a session object, that holds all the objects together? or do we couple each object directly?
+[11:17] <juberti> justin: this is a fairly fundamental issue
+[11:18] <juberti> ... this affects more than just ICE - this is anything that is per-session, e.g. bandwidth estimation
+[11:18] <juberti> ... I think we need some sort of global context object to tie these things together
+[11:19] == ShijunSun [~ShijunSun@public.cloak] has joined #ortc
+[11:19] <juberti> robin: I agree
+[11:19] <juberti> peter: does it need to be an object?
+[11:19] <juberti> ... i.e. could it be a string?
+[11:20] <juberti> justin: I think it should be an object... if it's a string, we can never add method/attribs to it in the future
+[11:20] <juberti> robin: we could make it an optional object
+[11:20] <juberti> ... that way simple apps don't need to care about this
+[11:21] <juberti> ... but people who need strict standards compliance/interop with legacy can get this without too much trouble
+[11:21] <juberti> justin: this sounds pretty good
+[11:22] <juberti> ACTION: Peter to make a proposal that captures this discussion (IceTransports have an optional Session parameter)
+[11:24] <juberti> robin: Factory methods versus ctors
+[11:25] <juberti> peter: adding factory methods is one thing, but changing all the ctors to factory methods is another
+[11:25] <juberti> peter: I don't really see the value in changing everything for this
+[11:25] <juberti> robin: this is a known 'con' of this proposal
+[11:26] <juberti> bernard: we have been moving away from factory methods
+[11:26] <juberti> robin: ctors can get pretty hairy though. we can only rearrange the ctor arguments so much
+[11:26] <juberti> peter: we can evaluate those things on a case-by-case basis
+[11:27] <juberti> peter: default should be normal ctor, if too complex, add ctor
+[11:27] <juberti> robin: does anyone care?
+[11:27] <juberti> peter: i don't want to spend time on things that are ok already
+[11:27] <juberti> peter: don't want to be different for the sake of being different
+[11:28] <juberti> robin: could be confusing to have two
+[11:29] <juberti> justin: ctors with dictionaries avoid the multiple ctor problem
+[11:31] <juberti> robin: does anyone have any more input on this?
+[11:31] <juberti> justin: i think this reduces to a stylistic discussion
+[11:31] <juberti> justin: and in such cases, I think we want to defer to existing precedent - e.g. ctors
+[11:32] <juberti> justin: so let's keep ctors
+[11:32] <juberti> robin: i'm ok with that
+[11:33] <juberti> mchampion: when do we publish our 1.1?
+[11:33] <juberti> robin: there are a bunch of issues to resolve
+[11:33] <juberti> robin: and some won't be part of 1.1
+[11:33] <juberti> erik: we'll have a labeling policy
+[11:34] <juberti> robin: yes, 1.1 and 1.2
+[11:34] <juberti> robin: thanks to the grop
+[11:34] <juberti> group
+[11:34] <juberti> ... time's up!
+[11:35] == ShijunSun [~ShijunSun@public.cloak] has quit ["Page closed"]
+[11:35] <juberti> ACTION: Bernard to make proposal for IPv6 (api or impl) and metering
