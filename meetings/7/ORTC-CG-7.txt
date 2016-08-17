@@ -1,0 +1,77 @@
+[09:12] == Erik [~Erik@public.cloak] has joined #ORTC
+[09:12] <mchampion> I will scribe
+[09:12] == Shijun [~Shijun@public.cloak] has joined #ortc
+[09:14] <mchampion> scribenick mchampion
+[09:14] <mchampion> Erik goes thru the Community Group Basics slides, explains IPR policy, encourages people to join CG
+[09:15] <mchampion> Erik summarizes latest editors draft slide
+[09:16] <mchampion> Bernard takes over to walk through issue 160 - maxptime. .  Proposal to put maxptime attribute  into codec parameters
+[09:18] <mchampion> Complication - how to handle ptimes for multiple codecs?
+[09:19] <mchampion> Justin: This is true, but its an advanced behavior.  True need to configure this is low, little push for it in WebRTC 1.0
+[09:19] <mchampion> Justin: We should do this right in ORTC, but it's an edge case.
+[09:20] <mchampion> Bernard: Would be a per-codec thing...
+[09:21] <mchampion> Justin: maxptime is what you need to send, ptime is an encoder setting, you might want to fine tune packetization overhead
+[09:22] <mchampion> Robin: Having the maxptime for the SDP is all we need for now
+[09:22] <mchampion> Justin: We should agree on maxptime ...then discuss ptime encoder parameter in a future version
+[09:25] <mchampion> Justin will write this up in bug 160
+[09:27] <mchampion> Bernard: moves to issue 163. Proposed answer -- No requirement to discard unhandled RTP packets, modest buffering allowed.
+[09:28] <mchampion> Robin: Is it really required to discard them in 1.0?
+[09:28] <mchampion> Robin: The name strongly implies they are thrown away.
+[09:28] <mchampion> Bernard: So are these events the same in ORTC and 1.0 or not?
+[09:29] <mchampion> Peter: There is code in Chrome to do some buffering
+[09:30] <mchampion> Peter: If ORTC implementation buffers and shims to 1.0, it won't cause problems.  Prefers the ORTC name, suggests going back to 1.0 WG to clarify, especially since this is just a pull request that hasn't been merged
+[09:31] <mchampion> Nobody remembers discussion of discarding vs buffering... scenario is when you get garbage you don't know what to do with, don't need to buffer that
+[09:33] <mchampion> Justin: Further investigation is needed into what WebRTC 1.0 assumes about discarded packet scenarios.
+[09:34] == alex_g_ [~alex_g@public.cloak] has joined #ORTC
+[09:34] <mchampion> Bernard: Martin is the right person to ask
+[09:35] <mchampion> Peter: Martin filed a bug in 2013, Harald closed the bug saying that the WG gave up on it.  Martin then filed a pull request for the discarded event.
+[09:36] <mchampion> https://www.w3.org/Bugs/Public/show_bug.cgi?id=21877
+[09:36] <mchampion> Bernard: We might have to add another event, and get to the bottom of what happened in 1.0
+[09:36] <mchampion> Bernard summarizes more editors draft changes listed in the slide
+[09:37] <mchampion> Bernard: Updated Big Picture (Issue 159)
+[09:38] <mchampion> Discussion of how to clarify the picture.  Need better way to show which lines represent candidates
+[09:39] <mchampion> Erik: Questions for the CG -- CG OK with the direction the draft is heading?  Questions about overall direction?
+[09:39] <mchampion> none heard
+[09:39] == alex_g [~alex_g@public.cloak] has quit [Ping timeout: 180 seconds]
+[09:39] <mchampion> Erik: summarizes next couple slides quickly ...
+[09:40] <mchampion> Bernard: Issue 164 -- IceGatherer state and pruning
+[09:41] <mchampion> Bernard clarifies that this is only local candidates
+[09:41] <mchampion> Robin: Need to keep gatherer warm for some amount of time, we haven't addressed that
+[09:45] <mchampion> Robin: Clear that pruning transport doesn't affect the gatherer, but there are new issues to explore
+[09:47] <mchampion> [lots of discussion of what these issues might be and what options there are to address them]
+[09:51] <mchampion> Bernard: Jumps to Issue 170 slide about connectivity checks
+[09:53] <mchampion> Peter: goes through options....
+[09:55] <mchampion> Justin: Easiest thing is to let ICE gathererer respond to checks...
+[09:58] <mchampion> Bernard: So people are OK with gatherer responding to check? MAY or MUST
+[09:58] <mchampion> Justin:  MUST  (others agree)
+[09:59] <mchampion> Bernard: Issue 166 ICE restart (slide 19)
+[10:06] <mchampion> Justing: We need to keep rolling on this, revisit it top down
+[10:07] <mchampion> Bernard: Issue 171 - consent failure slide 21 ..
+[10:07] <mchampion> Bernard: DTLS 1issue 168  Slide 22
+[10:08] <mchampion> Most people want to throw InvalidState in this scenario
+[10:09] <mchampion> Longer discussion of when to do DTLS re-handshake ...
+[10:12] <mchampion> Consensus that the answer to this issues is to throw InvalidState exception
+[10:13] <mchampion> But there are messy details to work out...
+[10:14] <mchampion> Justin: We need implementation experience to address this further
+[10:15] <mchampion> Bernard: Matching rules -- this will be complicated.  Not clear whether they are laid out in detail in 1.0
+[10:15] <mchampion> Peter: At a high level we need to align with 1.0
+[10:15] <mchampion> Justin: Rules seem to be written down in JSEP
+[10:16] <mchampion> Robin: Slide 24
+[10:16] <mchampion> Details Peter's proposal ... now in section 8.3
+[10:17] <mchampion> Robin: Slide 25
+[10:18] <mchampion> Robin: Slide 26
+[10:19] <mchampion> Robin: SLide 27 - poses questions we need to answer
+[10:20] <mchampion> Peter: quote from RFC5956 in chat
+[10:22] <mchampion> Robin: Use Case: Distinct Audio SSRCs slide.
+[10:25] <Erik> 5 minutes remaining
+[10:29] <mchampion> Peter: Describes Unified Plan solution
+[10:30] <mchampion> No conclusion, need to take this to the list
+[10:30] <mchampion> Bernard: We can't differ from 1.0 without creating problems ...
+[10:32] <mchampion> Slide 32: Any comments?
+[10:33] <mchampion> Erik: Hookflash ortclib is in progress, about 65% done.Mentions Microsoft's announcements about ORTC.  Asks Peter and Justin for comments on Chrome's plans
+[10:34] <mchampion> Justin: Focused on getting right stuff into 1.0 spec, such as Sender/Receiver, and dealing with some of the problems it creates
+[10:34] <mchampion> Erik: Any comments on pending 1.0 pull requests?
+[10:35] <mchampion> Justin: This is a high priority for editor team, but it's complicated.  Not sure of exact timeline, hope to see 1.0 action items resolved by March IETF meeting
+[10:36] <mchampion> Erik: Presents slide 33
+[10:36] * mchampion has to run, Erik maybe you could record anything else in IRC
+[10:41] == Shijun [~Shijun@public.cloak] has quit ["Page closed"]
+[10:41] == alex_g_ [~alex_g@public.cloak] has quit ["Page closed"]
