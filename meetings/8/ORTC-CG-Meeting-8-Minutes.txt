@@ -1,0 +1,118 @@
+[09:17] == Lags [~Lags@public.cloak] has joined #ORTC
+[09:59] == robinraymond [~robinraymond@public.cloak] has joined #ortc
+[09:59] <robinraymond> ping :)
+[10:09] == mathieucitrix [~mathieucitrix@public.cloak] has joined #ortc
+[10:16] <robinraymond> https://plus.google.com/hangouts/_/calendar/ZWxhZ2Vyd2F5QGdtYWlsLmNvbQ._6ksm2d3270o3eb9l6soj0b9kclj34bb1cdhj0b9m60pj6ohncksj4db1cg
+[10:22] == emcho__ [~emcho@public.cloak] has joined #ortc
+[10:22] == emcho_ [~emcho@public.cloak] has joined #ortc
+[10:22] == emcho [~emcho@public.cloak] has joined #ortc
+[10:22] == emcho__ [~emcho@public.cloak] has quit ["Page closed"]
+[10:23] == emcho [~emcho@public.cloak] has left #ORTC []
+[10:23] == emcho_ [~emcho@public.cloak] has left #ORTC []
+[10:23] == emcho [~emcho@public.cloak] has joined #ortc
+[10:24] <emcho> editor’s draft changes (ICE issues)
+[10:24] <emcho> issue 173: early dtls packets
+[10:26] <emcho> issue 186
+[10:27] <emcho> except for stopping and getting remote params everything else throws an exception
+[10:27] <emcho> issue 194
+[10:29] <emcho> there’s asymmetry there that makes things weird
+[10:29] <emcho> other ICE related issues
+[10:32] <emcho> signalling end-of-candidates throuth the API
+[10:32] <emcho> TAKE AWAY / ACTION: investigate whether we need some kind of value in the empty dictionary that signals end-of-candidates
+[10:33] <emcho> juberti: sample code would make things clearer
+[10:33] <emcho> ACTION: file an issue on this
+[10:34] <emcho> question: does close() close the port
+[10:34] <emcho> robin: no, because the port can also be in use by others
+[10:34] <emcho> (in case of forks)
+[10:34] <emcho> calling gatherer.close() woujld close the port though
+[10:35] <emcho> as for DTLS: closing that would also close the ICE transport
+[10:35] <emcho> but the implications are not clear
+[10:36] <emcho> ACTION: open an issue on this (although we might already have one)
+[10:36] <emcho> juberti: question about 177 (DTMF)
+[10:37] <robinraymond> do we need to advertise DTMF capabilities for events
+[10:37] <robinraymond> do we need to advertise DTMF capabilities for events?
+[10:37] <robinraymond> we do not respond to incoming DTMF events currently... so why announce what we support?
+[10:39] <emcho> TAKE AWAY : maybe we don’t need to expose this at all .
+[10:39] <emcho> pthatcher: question about packet buffering
+[10:40] <emcho> did we decide to include the gatherer in the transport constructor?
+[10:40] <emcho> robin: i have slides on this, so will come back to it later. so far we don’t have a solution though
+[10:40] <emcho> pthatcher: i am anxious to avoid buffering packets
+[10:41] <emcho> pthatcher: one other question: before we verify finger prints, is it so bad to receive media in an unverified state
+[10:42] <emcho> robin: the remote side has already verified so it’s ok. shouldn’t be bad from a receiving perspective.
+[10:42] <emcho> the part that is not trusting is not leaking anything
+[10:42] <emcho> pthatcher: i don’t want this to go on forever
+[10:42] <emcho> bernard: it won’t. because if it takes too long, things will fail
+[10:43] <emcho> juberti: an attacker could try to use the delay (even if it’s a corner case)
+[10:44] <emcho> juberti: we should buffer but never bubble up to the application before we verify
+[10:44] <emcho> pthatcher: for audio, does this mean clipping?
+[10:45] <emcho> juberti: yes
+[10:45] <emcho> juberti: again, shouldn’t affect the vast majority of users
+[10:46] <emcho> robin: especially fine for telephony
+[10:46] <emcho> robin: this should also play into 170
+[10:47] <emcho> TAKE AWAY: we should (at least for now) have a very clear security policy where the stack only bubbles up to the application whatever’s been verified. this means buffering stuff only so that we the decoder can be in the rights state. this means we are basically throwing away audio but keeping video
+[10:47] <emcho> juberti: we could also decode everything but not render it
+[10:48] <emcho> robin: ICE gatherer pruning
+[10:49] <emcho> robin: do we want to allow conn checks to be responded before calling transport.start() ?
+[10:50] <emcho> issue: it is not clear, in a fork scenario, when can the gatherer prune candidates
+[10:50] <emcho> prematurely pruning stuff can break connectivity
+[10:50] <emcho> but if you don’t prune, then you are wasting resource
+[10:51] <emcho> (ports and batter for unnecessary interfaces)
+[10:51] <emcho> one suggestion is to pass the gatherer to the ice transport
+[10:51] <emcho> this way the gatherer can prune only when all transports are done
+[10:52] <emcho> robin: i like this
+[10:53] <emcho> robin: the advantage is that the API is pruning automatically and the programmer can be dumb
+[10:53] <emcho> (the JS programmer that is)
+[10:54] <emcho> pthatcher: (ACTION ITEM) what happens if you don’t pass a gatherer
+[10:54] <emcho> robin: don’t know, we still need to decide
+[10:54] <emcho> robin / pthatcher:  think we don’t prune until we attach
+[10:54] <emcho> CONSENSUS
+[10:55] <emcho> second option: adding an explicit method setKeepAlive()
+[10:56] <emcho> it’s very explicity so no ambiguity but the programmer needs to be smart so that’s a disadvantage
+[10:57] <emcho> again, there seems to be CONSENSUS on the first option. so let’s go for that
+[10:59] <emcho> emcho: pruning is confusing with 5245 pruning, so ACTION, change to garbage collecting
+[10:59] <emcho> next issue
+[11:00] <emcho> early connectivity checks (checks that arrive locally before you have called transport.start() )
+[11:00] <emcho> should we buffer or should we acto on them immediately
+[11:01] <emcho> s/acto/act
+[11:01] <emcho> buffering might cause delays, but responding early may trigger DTLS and media way too early
+[11:01] <emcho> but I (robin) think it’s nice to respond early
+[11:02] <@Lags> 30 minutes remaining
+[11:02] <emcho> responding too early from the gatherer might cause you to give an affirmative response when you should complain about a role conflict
+[11:03] <emcho> one possible solution is to (again) attach gatherer to transport
+[11:04] <emcho> so you have a full pipeline setup before you can receive your check
+[11:05] <emcho> two problems with this: there’s a tiny tiny window between when you construct your    ice transport (and conn responses would latch to it) but you are not ready with DTLS yet
+[11:06] <emcho> emcho: it could be a bigger window depending on programmer
+[11:07] <emcho> second problem is that calling start with a ufrag different that the autolatched
+[11:08] <emcho> robin: second possible solution. instead of emitting an event in the autolatching, you do an event when a check arrives and you can use that to call start()
+[11:08] <emcho> the good thing: allows to respond to signalling. eliminates race conditions
+[11:09] <emcho> the bad thing: still requires buffering
+[11:09] <emcho> QUESTION: is either solution acceptable?
+[11:10] <emcho> pthatcher: like the first one. very simple for 1-to-1. main issue i see, when you auto fill the remote ufrag, what do you do after it arrives … but we can resolve that
+[11:11] <emcho> robin: yeah but is it worth it
+[11:15] <emcho> some back and forth on the issue
+[11:16] <emcho> robin: any ideas on how to avoid the conflict with auto latching?
+[11:16] <emcho> pthatcher emits a suggestion
+[11:16] <emcho> robin: basically you are proposing a factory method?
+[11:16] <emcho> pthatcher: yes
+[11:17] <emcho> roman: does this really exist?
+[11:17] <emcho> pthatcher: yes
+[11:17] <emcho> because signalling and connchecks are in different threads in chrome
+[11:17] <emcho> robin: i’d also have the issue in my impl
+[11:19] <emcho> CONSENSUS CALL: does everybody like Method 1 but with the presumption that we can solve the forking problem. we are still taking this to the list to confirm and look  for other solutions
+[11:20] <emcho> roman: we need the full solution before we pick a direction
+[11:20] <emcho> pether: ACTION I’ll send a fuller proposal to the list
+[11:20] <emcho> everyone: thanks peter
+[11:21] <emcho> next issue: priority calculation
+[11:22] <emcho> discussion on the solution proposed in the slide
+[11:23] <emcho> juberti and peter are worried that things can get out of sync
+[11:23] <emcho> robin: we could just throw exceptions if you mismatch things
+[11:24] <emcho> juberti: isn’t there a way to handle everything with createAssociatedTransport()
+[11:24] <emcho> juberti: not against having the second method either
+[11:25] <emcho> robin: anyone has anything better?
+[11:26] <emcho> juberti: i like having the rtcp-mux case simpler
+[11:26] <emcho> CONSENSUS for createAssociatedGatherer() and generally making it easier for the RTCP-MUX
+[11:27] <robinraymond> remove from transport if possible
+[11:29] <emcho> ACTION: emil will ask Philipp Hancke to convert his comments into something that everyone can read (not only adobe acrobat reader users)
+[11:33] <emcho> Thank you slide!
+[11:35] <emcho> discussion on the next meeting
+[11:36] <emcho> erik+bernard+justin: CONSENSUS on the third week of June
