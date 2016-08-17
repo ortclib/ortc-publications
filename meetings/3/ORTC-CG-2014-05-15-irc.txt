@@ -1,0 +1,158 @@
+[09:56] == Erik [~Erik@public.cloak] has joined #ortc
+[09:58] == robinraymond [~robinraymond@public.cloak] has joined #ortc
+[09:59] == bernard [~bernard@public.cloak] has joined #ortc
+[10:08] == mchampion [~mchampion@public.cloak] has joined #ortc
+[10:08] == emcho [~emcho@public.cloak] has joined #ortc
+[10:08] == Shijun_Sun [~Shijun_Sun@public.cloak] has joined #ortc
+[10:09] <bernard> Link to Editor's draft: http://ortc.org/wp-content/uploads/2014/05/ortc.html
+[10:09] == juberti [~juberti@public.cloak] has joined #ortc
+[10:09] <emcho> slide 5
+[10:09] <bernard> Hangout on Air Event Link:
+[10:10] <emcho> slide 6
+[10:10] <emcho> slide 7
+[10:10] <emcho> bernard: two things. we tried to fix examples so that they would match the API.
+[10:11] <emcho> justin: ice restarts are not fully solved yet.
+[10:11] <emcho> justin: we need a controller object that would drive restarts
+[10:11] <emcho> robin: we’d need a proposal on how to do it
+[10:12] <emcho> bernard: we’ve tried to clear events and callbacks. a bunch of nits too. we’ve also fixed issues about retrieving ssrcs and others.
+[10:12] <emcho> bernard: we are also working on stats as per harald’s sueggestions
+[10:13] <emcho> bernard and robin: we need to talk more about SVC knobs and whether we actually need them
+[10:13] <emcho> justin: these are things that we really need consensus on. these are core parts of the value prop so we have to agree before adopting them
+[10:13] <emcho> slide … 8 i guess
+[10:14] <emcho> robin: questions?
+[10:14] <emcho> about the spec that is
+[10:14] <emcho> (everyone sounds happily silent)
+[10:14] <emcho> erik: people that are on youtube, if you have input go to IRC. that’s where the real party is
+[10:15] <emcho> slide 9
+[10:15] <emcho> slide 10
+[10:16] <emcho> slide 11
+[10:17] <emcho> justin: so with ICE checks need to happen in a certain order. e.g. both sides need to be checking audio.rtp at the same time.
+[10:18] <emcho> first so that you would have simultaneous connections for NAT traversal to succeed but also because order helps you optimise
+[10:18] <emcho> in SDP and WEBRTC 1.0 order comes from the SDP ordering
+[10:18] <emcho> slide 12
+[10:18] <emcho> we wondered whether we could do this implicitly
+[10:18] <emcho> like using the order of creation
+[10:19] <emcho> but then what happens if you have separate transports for separate sessions … notions of implicit progress wouldn’t work there
+[10:19] <emcho> so we need something explicity
+[10:19] <emcho> so Peter and I are proposing the RTCTransportController
+[10:19] <emcho> it establishes groupings for sessions
+[10:20] <emcho> in addition to order this also provides  ways of grouping things so that bandwidth esstimations can be done in a sensible way (i.e. on a per session basis)
+[10:20] <emcho> so the transport controller would separate transports into sessions
+[10:21] <emcho> this could kind of map to the current peerconnection in webrtc 1.0
+[10:21] <emcho> slide 13
+[10:22] <emcho> an important note is that rtcp doesn’t need to be handled explicitly
+[10:22] <emcho> so rtcp transports need to know they below to a “number 2” component
+[10:22] <emcho> this is important for priorities
+[10:22] <emcho> but also because of freezing
+[10:23] <emcho> so we need to be able to define that relationship
+[10:23] <emcho> the way we’ve done this is by adding a new method
+[10:23] <emcho> that asks for an ICE transport that’s “associated” to an existing transport
+[10:24] <emcho> so if you are negotiating rtcp-mux you start with two transports
+[10:24] <emcho> you sig to remote side
+[10:24] <emcho> and based on response you use one or two transports
+[10:24] <emcho> robin: controller is not mandatory right?
+[10:25] <emcho> justin: yeah … don’t know. maybe not
+[10:25] <emcho> i think we should discourage that. people should use a controller as soon as they have a second transport
+[10:26] <emcho> it’s not only for backwards compat. that’s probably where all future session groupings would be handled
+[10:26] <emcho> robinraymond: there was a question about forking. after reviewing this proposal I am comfortable that forking would work with this. so fear not you’ll be able to fork!
+[10:27] <emcho> juberti: we can’t hear you
+[10:27] <emcho> above was not part of notes
+[10:28] <emcho> juberti: peter and I agree: this is mostly solved with associated transports
+[10:28] <emcho> robinraymond: i don’t even think you need that. it will just work
+[10:29] <emcho> juberti: could you please explain offline how?
+[10:29] <emcho> i just want to make sure that the spec is clear about how this needs to be handled
+[10:29] <emcho> bernard: we should also be clear on what implementors would need to do here
+[10:30] <emcho> ACTION POINT: Robin should explain this in a message
+[10:30] <emcho> ACTION POINT: Justin should review Robin’s idea and update the proposal accordingly
+[10:31] <emcho> slide 17
+[10:31] <emcho> robinraymond: we need to agree on where we are headed
+[10:32] <emcho> so let’s go through the WebRTC 1.0 use cases and try to determine which ones would work and which wouldn't
+[10:32] <emcho> QUESTION TO ALL: do we agree that we want to support all W1.0 use cases
+[10:32] <emcho> QUESTION TO ALL: if not, why?
+[10:32] <emcho> bernard: those use cases weren’t api dependent so they should probably apply here
+[10:33] <emcho> robinraymond: raises the MTI question
+[10:33] <emcho> juberti: ORTC would probably inherit the requirement  … that’s decision is probably not within the scope of the group
+[10:34] <emcho> bernard: if people have objections they should also bring them to the ietf
+[10:35] <emcho> juberti: rtcp-mux, not sure if we should continue supporting this. (non-use that is)
+[10:37] <emcho> juberti: if i wanna make sure that i have good redundancy (with svc and opus fec) i have to be able to do that on the RTPSender itself
+[10:38] <emcho> bernard: one thing to mention: there might be different protections on different layer. it should be understood that this is a multistream feature and you need different SSRCs in order to do that
+[10:39] <emcho> robinraymond: you can mix and match simulcast and svc to achieve any combination
+[10:39] <emcho> juberti: both bullet points are kind of isomorphic.
+[10:40] <emcho> bernard: should we think about quality scalability
+[10:40] <emcho> juberti: i’ve heard it’s not that effective
+[10:40] <emcho> bernard: probably right. i only know one  product that does it
+[10:42] <emcho> robinraymond: there are many things we can put int the api but i think most importantly now we should make sure that they are  addable to the ORTC  spec
+[10:43] <emcho> slide 21: non-call scenarios
+[10:44] <emcho> robinraymond: are we ok with this set of use cases?
+[10:44] <emcho> Erik: just one comment on the last use case. there another important scenario here: amazon mayday button. one-way video, bidirectional audio and some application sharing
+[10:45] <emcho> juberti: we should probably create a document with these things. have it say why they are difficult with webrtc  1.0 and how they are eaiser with ortc
+[10:48] <emcho> emcho: we should note that signalling is not required for adding and removing receivers
+[10:48] <emcho> juberti: ok. what use cases do you think this is important?
+[10:49] <emcho> emcho: probably several. any place  where media source can arrive and depart frequently
+[10:49] <emcho> ACTION ITEM: robinraymond will start a document describing ORTC advantages. Justin, Emil and others are expected to join in with feedback
+[10:50] <emcho> robinraymond: capabilities vs parameters
+[10:51] <emcho> slide 23
+[10:52] <emcho> the big picture is about enabling different negotiation scenarios
+[10:52] <emcho> slide 24
+[10:52] <emcho> the big difference between create in filter is that create gives you the default
+[10:53] <emcho> whereas params is about what you actually “want” to do based on receiver and sender capabilities, which are not always the same
+[10:53] <emcho> slide 25
+[10:55] <emcho> bernard: the example here is about creating send and recv params using filter calls
+[10:55] <emcho> robinraymond: we don’t want people to HAVE to go through it. these things are just there in case people actually need them
+[10:56] <emcho> slide 27
+[10:57] <emcho> bernard: we have two main assumptions here. 1. when you filter locally created params through remote caps. that produces the same result as creating local params constrained by remote caps
+[10:57] <emcho> 2. filtering remotely created params through  …. (it’s actually on the slide)
+[11:01] <emcho> a hard to follow discussion about the esoterics of create / filter params / caps … with a pinch of sdp
+[11:02] <emcho> slide 28
+[11:04] <emcho> slide 29
+[11:05] <emcho> juberti and robinraymond we should either define filterparams fully or yank it. there’s no middle ground
+[11:05] <emcho> slide 29 again
+[11:06] <emcho> robinraymond: filtering params doesn’t really work right now … as per the current definition
+[11:08] <emcho> slide 33 (seems I was lagging )
+[11:08] == juberti [~juberti@public.cloak] has quit [Ping timeout: 180 seconds]
+[11:08] <emcho> juberti: things like RTX and basic SVC should work out of the box
+[11:09] <emcho> bernard: ok then, let’s agree on making sure that the use cases we mentioned would work
+[11:09] <emcho> general agreement
+[11:09] <emcho> juberti: the goal for this is that when you don’t know what buttons to push, things would still work for you
+[11:10] <emcho> we should have actions for every use case  and make sure they all work
+[11:11] <emcho> robinraymond: unless we are precies browsers would get create and filter wrong
+[11:12] <emcho> ACTION ITEM: we need to write examples on the use cases document and make sure they all work
+[11:14] <emcho> Shijun_Sun: we should really start with the basic usecases
+[11:14] <emcho> bernard: especially the audio ones
+[11:17] <emcho> slide 36
+[11:17] <emcho> JSL vs native support
+[11:19] <emcho> slide 38
+[11:19] <emcho> juberti: there’s already an implementation for creating and filtering params: SDP
+[11:19] <emcho> so if we decide to take this on, we are signing up for the same thing
+[11:20] <emcho> so my feeling is that we should remove create and filter
+[11:20] <emcho> do those as a JSL
+[11:21] <emcho> general consensus
+[11:21] <emcho> caveat: we need to make sure we can actually write the JSL layer
+[11:21] <emcho> juberti: we could possibly start with a simple JSL impl (oSDP)
+[11:22] <emcho> juberti:  i am sure vendors would take care of the more complicated stuff
+[11:22] <emcho> this will be a good time to talk about the 1.0 shim
+[11:22] <emcho> because these things overlap
+[11:23] <emcho> robinraymond: i am seeing consensus on doing this as a JSL
+[11:24] <emcho> ACTION ITEM: someone needs to create the beginnnings of the JSL. Peter signs up for this (unknowingly)
+[11:25] <emcho> robinraymond: moing to our end game
+[11:26] <emcho> Erik: we are shooting for a first iteration. final’s too strong
+[11:27] <emcho> juberti: we can probalby just shoot for implementability
+[11:27] <emcho> for now
+[11:27] <emcho> then we can have a last call. and consider our mission completed and shut down
+[11:28] <emcho> juberti: that to me feels like a year from now (best case)
+[11:28] <emcho> robinraymond: matches my expectation
+[11:29] <emcho> robinraymond: also things like  stats and idp (bernard: and dtmf) shouldn’t be show stoppers
+[11:29] <emcho> juberti: so if we do that we are likely going to graduate into the webrtc1.0 working group
+[11:30] <emcho> robinraymond: we need to make sure we don’t have goals otherwise this won’t happen
+[11:32] <emcho> Erik: we should be shooting for a public draft before the end of june
+[11:32] <emcho> bernard: we need to make sure what bugs we need to fix till then
+[11:34] <emcho> general agreement on shooting for end of june
+[11:35] <emcho> juberti: a good question: what will be runnable
+[11:35] <emcho> juberti: bernard what’s the state of the ms preview
+[11:35] <emcho> bernard: it’s a couple of revisions back but has the basics
+[11:36] <emcho> juberti: we should make sure that we have the shim and apprtc works on top of it
+[11:36] <emcho> juberti: is anyone working on this?
+[11:42] <emcho> discussion on options
+[11:46] == Shijun_Sun [~Shijun_Sun@public.cloak] has quit ["Page closed"]
+[11:49] == bernard [~bernard@public.cloak] has quit [Ping timeout: 180 seconds]
+[11:50] <robinraymond> Thanks Emil!
