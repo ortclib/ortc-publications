@@ -1,0 +1,48 @@
+[09:58] == Erik [~Erik@public.cloak] has joined #ORTC
+[10:00] == Shijun [~Shijun@public.cloak] has joined #ORTC
+[10:02] == Shijun [~Shijun@public.cloak] has quit ["Page closed"]
+[10:03] == robinraymond [~robinraymond@public.cloak] has joined #ortc
+[10:03] <robinraymond> slides: https://docs.google.com/presentation/d/1dJbo1fEeKxZrDQVgUJxA3daIgFaKaLOFKNWYu6ulx_8/edit?usp=sharing
+[10:04] <robinraymond> latest spec: http://ortc.org/wp-content/uploads/2015/06/ortc.html
+[10:08] <robinraymond> attendee link: https://plus.google.com/hangouts/_/hoaevent/AP36tYc6d9AOemOP03PDRtIfOvqgE2tcnLV_jVQlRqbEdA6zNV__kQ?authuser=0&hl=en
+[10:16] <robinraymond> RTCIceCandidateComplete - is the dictionary needed?
+[10:16] <robinraymond> dictionary vs method?
+[10:20] <robinraymond> consensus to add "notify do not expect any more remote candidates" to RTCIceTransport
+[10:20] <robinraymond> Peter proposed method, Shijin agreed.
+[10:20] <robinraymond> Robin - no strong leanings, but likes method too
+[10:21] <robinraymond> need a name that makes sense
+[10:22] <robinraymond> WebRTC 1.0 no longer allows nullable addRemoteCandidate
+[10:25] <robinraymond> RTCIceTransport state changes - has two additional arrows from WebRTC 1.0
+[10:25] <robinraymond> WebRTC 1.0 missing state from connected to checking
+[10:26] <robinraymond> possible state change from failed to checking depending what happens with continous nominiation
+[10:26] <robinraymond> getStates: on closed objects - what do we do/
+[10:26] <robinraymond> getStates currently throws an error
+[10:27] <robinraymond> if object is closed
+[10:27] <robinraymond> why are we throwing exceptions when object is closed?
+[10:29] <robinraymond> getStates should not return an error, at most a rejected promise if can't be fulfilled
+[10:32] <robinraymond> WebRTC 1.0 should change DTMF to Dtmf
+[10:37] <robinraymond> we don't need "generation" for ICE candidates, Peter T mentioned gice is going to move away from it
+[10:39] <robinraymond> privacy for related address on ICE
+[10:40] <robinraymond> related address could be empty on ICE
+[10:40] <robinraymond> related address could be empty on ICE candidate
+[10:40] <robinraymond> issue #213
+[10:41] <robinraymond> issue #210 - non muxed RTP RTCP dtls transports
+[10:42] <robinraymond> issue #211 - takes time to generate certificates
+[10:42] <robinraymond> issue #218 - how do we use the same fingerprint across all forks of dtls transport
+[10:44] <robinraymond> issue 210 - offering different fingerprints for RTP vs RTCP
+[10:46] <robinraymond> issue #210 - or mandate they are the smae
+[10:46] <robinraymond> issue #211 - make it a promise for getLocalParams
+[10:46] <robinraymond> issue #218 - DtlsTransport.cloneTransport ? ugg :(
+[10:57] <robinraymond> certificate management is the way to go for dtls transport
+[10:57] <robinraymond> is optional param in constructor?
+[10:57] <robinraymond> lets do up some samples
+[11:11] <robinraymond> issue #170 - "should" buffer incoming DTLS packets before DTLS transport is attached ICE transport - use SHOULD in the spec
+[11:13] <robinraymond> rename "getOrCreateTransport"
+[11:29] <robinraymond> added failed state to DTLS transport
+[11:33] <robinraymond> PR webRTC 1.0 for DTMF sender CamelCase
+[11:34] <robinraymond> ^ Peter T ti fuke
+[11:34] <robinraymond> ^ Peter T ti file
+[11:35] <robinraymond> ^ Peter T to file - ARGH
+[11:35] <robinraymond> Erik L to email out action itmes
+[11:37] <robinraymond> ClueCon
+[11:38] <robinraymond> action item: post previous cluecon meeting video + slides
